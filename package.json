@@ -1,0 +1,27 @@
+{
+  "name": "telegram-stickerpack-dl-bot",
+  "version": "0.0.1",
+  "description": "Stickerpack download bot",
+  "author": "libertylocked",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/libertylocked/telegram-stickerpack-dl-bot"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "tsc && node bin/index.js"
+  },
+  "main": "./bin/index.js",
+  "dependencies": {
+    "@types/dotenv": "^4.0.0",
+    "@types/node": "^8.0.18",
+    "botgram": "^2.0.1",
+    "dotenv": "^4.0.0"
+  },
+  "devDependencies": {
+    "tslint": "^5.5.0",
+    "typescript": "^2.4.2"
+  }
+}

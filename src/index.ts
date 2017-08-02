@@ -1,5 +1,6 @@
-const Botgram: any = require("botgram");
 import * as Dotenv from "dotenv";
+import * as TelegramBot from "node-telegram-bot-api";
+// const TelegramBot = require("node-telegram-bot-api");
 
 // load .env config file
 Dotenv.config();
@@ -10,26 +11,34 @@ if (!BOT_TOKEN) {
   process.exit(1);
 }
 
-const bot = new Botgram(BOT_TOKEN);
+// bot options
+const botOptions = {
+  polling: true,
+  interval: 1000,
+};
+
+const bot = new TelegramBot(BOT_TOKEN as string, botOptions);
 console.log("Bot started!");
 
-// register chat specific contexts
-bot.context({ });
-
-// show help
-bot.command("start", (msg: any, reply: any, next: any) => {
-  reply.text("Welcome to sticker pack download bot\n" +
+bot.onText(/\/start/, (msg, match) => {
+  bot.sendMessage(msg.chat.id,
+    "Welcome to sticker pack download bot\n" +
     "Send me a sticker to get started");
 });
 
-// send a handsome squidward sticker
-bot.sticker((msg: any, reply: any, next: any) => {
-  // reply.sticker("CAADAQADBwADoUYoEZGZAR-daGHnAg");
-  bot.fileGet(msg.file.id, (err: any, f: any) => {
-    console.log(f);
-    reply.text(bot.fileLink(f.path));
-  });
-  bot.getStickerSet(msg.set_name, (err: any, result: string[]) => {
-    console.log(result.length);
-  });
+bot.on("sticker", (msg: TelegramBot.API.IMessage) => {
+  if (!msg.sticker) {
+    bot.sendMessage(msg.chat.id, "Error: message does not contain a sticker");
+    return;
+  }
+
+  bot.getFileLink(msg.sticker.file_id)
+    .then((url) => {
+      bot.sendMessage(msg.chat.id, "The sticker can be downloaded at: \n" + url);
+    });
+
+  bot._request("getStickerSet", { form: { name: msg.sticker.set_name } })
+    .then((set: TelegramBot.API.IStickerSet) => {
+      bot.sendMessage(msg.chat.id, "The set contains " + set.stickers.length + " stickers");
+    });
 });

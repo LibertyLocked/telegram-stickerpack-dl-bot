@@ -10,6 +10,8 @@ declare module "node-telegram-bot-api" {
     public onText(regexp: RegExp, callback: (msg: TelegramBot.API.IMessage, match: RegExpExecArray | null) => void): void;
     public on(event: TelegramBot.MessageType, listenerFn: (...args: Array<any>) => void): void;
     public sendMessage(chatId: string | number, text: string, options?: any): Promise<TelegramBot.API.IMessage>;
+    public sendDocument(chatId: string | number, doc: string | ReadableStream | Buffer, options?: any, fileOpts?: any)
+      : Promise<TelegramBot.API.IMessage>;
     public getFileLink(fileId: string): Promise<string>;
 
     // XXX: wildcard for unimplemented methods

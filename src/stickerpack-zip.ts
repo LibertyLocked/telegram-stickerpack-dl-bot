@@ -2,7 +2,24 @@ import * as fetch from "isomorphic-fetch";
 import * as JSZip from "jszip";
 import * as TelegramBot from "node-telegram-bot-api";
 
-export const fetchStreamAsync = async (fileURI: string): Promise<ReadableStream> => {
+interface IBufferedFile {
+  filename: string;
+  stream: ReadableStream;
+}
+
+const getBufferedStickerAsync = (bot: TelegramBot) => {
+  return async (sticker: TelegramBot.API.ISticker): Promise<IBufferedFile> => {
+    const fileURI: string = await bot.getFileLink(sticker.file_id);
+    const filename = fileURI.slice(fileURI.lastIndexOf("/") + 1);
+    const stream = await fetchStreamAsync(fileURI);
+    return {
+      filename,
+      stream,
+    } as IBufferedFile;
+  };
+};
+
+const fetchStreamAsync = async (fileURI: string): Promise<ReadableStream> => {
   const resp = await fetch(fileURI);
   if (resp.body === null) {
     throw new Error("body is null when fetching " + fileURI);
@@ -22,10 +39,8 @@ export const getZippedStickersAsync = (bot: TelegramBot) => {
       // this starts a task to put every sticker into the zip
       // and puts the running tasks into tasks array
       return (async () => {
-        const fileURI: string = await bot.getFileLink(sticker.file_id);
-        const filename = fileURI.slice(fileURI.lastIndexOf("/") + 1);
-        const stream = await fetchStreamAsync(fileURI);
-        zip.file(filename, stream);
+        const bufferedFile = await getBufferedStickerAsync(bot)(sticker);
+        zip.file(bufferedFile.filename, bufferedFile.stream);
       })();
     });
 

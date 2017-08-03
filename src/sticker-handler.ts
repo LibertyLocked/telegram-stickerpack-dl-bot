@@ -31,6 +31,8 @@ export default (bot: TelegramBot) => async (msg: TelegramBot.API.IMessage) => {
   const zipBuffer = await getZippedStickers(bot)(stickerSet.stickers);
   bot.sendDocument(msg.chat.id, zipBuffer, {
     reply_to_message_id: msg.message_id,
+  }, {
+    filename: `${stickerSet.name}.zip`,
   });
 
   console.log("zipped and sent", stickerSet.name);

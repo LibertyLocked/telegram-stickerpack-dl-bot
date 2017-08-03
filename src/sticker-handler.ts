@@ -1,5 +1,5 @@
 import * as TelegramBot from "node-telegram-bot-api";
-import { getZippedStickers } from "./stickerpack-zip";
+import { getZippedStickersAsync } from "./stickerpack-zip";
 
 export default (bot: TelegramBot) => async (msg: TelegramBot.API.IMessage) => {
   if (!msg.sticker) {
@@ -28,7 +28,7 @@ export default (bot: TelegramBot) => async (msg: TelegramBot.API.IMessage) => {
     { parse_mode: "HTML" });
 
   // give user the download link to the zipped sticker pack
-  const zipBuffer = await getZippedStickers(bot)(stickerSet.stickers);
+  const zipBuffer = await getZippedStickersAsync(bot)(stickerSet.stickers);
   bot.sendDocument(msg.chat.id, zipBuffer, {
     reply_to_message_id: msg.message_id,
   }, {

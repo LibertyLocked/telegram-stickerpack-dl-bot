@@ -10,8 +10,12 @@ export const fetchStreamAsync = async (fileURI: string): Promise<ReadableStream>
   return resp.body;
 };
 
-export const getZippedStickers = (bot: TelegramBot) => {
-  return async (stickers: TelegramBot.API.ISticker[]): Promise<ReadableStream> => {
+/**
+ * Returns a stream buffer of the zipped stickers when resolved
+ * @param bot Telegram bot instance
+ */
+export const getZippedStickersAsync = (bot: TelegramBot) => {
+  return async (stickers: TelegramBot.API.ISticker[]): Promise<Buffer> => {
     const zip: JSZip = new JSZip();
     const addToZipTasks = stickers.map((sticker) => {
       // map isn't async

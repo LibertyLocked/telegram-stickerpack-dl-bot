@@ -61,9 +61,9 @@ declare module "node-telegram-bot-api" {
         reply_to_message?: IMessage;
         edit_date?: number;
         text?: string;
-        entities?: any;
+        entities?: IMessageEntity[];
         audio?: any;
-        document?: any;
+        document?: IDocument;
         game?: any;
         photo?: IPhotoSize[];
         sticker?: ISticker;
@@ -73,7 +73,7 @@ declare module "node-telegram-bot-api" {
         new_chat_members?: IUser[];
         caption?: string;
         contact?: any;
-        location?: any;
+        location?: ILocation;
         venue?: any;
         new_chat_member?: IUser;
         left_chat_member?: IUser;
@@ -88,6 +88,15 @@ declare module "node-telegram-bot-api" {
         pinned_message?: IMessage;
         invoice?: any;
         successful_payment?: any;
+      }
+
+      interface IMessageEntity {
+        type: "mention" | "hashtag" | "bot_command" | "url" | "email" | "bold" | "italic" | "code" |
+          "pre" | "text_link" | "text_mention";
+        offset: number;
+        length: number;
+        url?: string;
+        user?: IUser;
       }
 
       interface IUser {
@@ -106,9 +115,27 @@ declare module "node-telegram-bot-api" {
         first_name?: string;
         last_name?: string;
         all_members_are_administrators?: boolean;
-        photo?: any;
+        photo?: IChatPhoto;
         description?: string;
         invite_link?: string;
+      }
+
+      interface IChatPhoto {
+        small_file_id: string;
+        big_file_id: string;
+      }
+
+      interface ILocation {
+        longitutde: number;
+        latitude: number;
+      }
+
+      interface IDocument {
+        file_id: string;
+        thumb?: IPhotoSize;
+        file_name?: string;
+        mime_type?: string;
+        file_size?: number;
       }
 
       interface ISticker {

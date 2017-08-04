@@ -12,6 +12,7 @@ declare module "node-telegram-bot-api" {
     public sendMessage(chatId: string | number, text: string, options?: any): Promise<TelegramBot.API.IMessage>;
     public sendDocument(chatId: string | number, doc: string | ReadableStream | Buffer, options?: any, fileOpts?: any)
       : Promise<TelegramBot.API.IMessage>;
+    public editMessageText(text: string, form?: any): Promise<TelegramBot.API.IMessage> | true;
     public getFileLink(fileId: string): Promise<string>;
 
     // XXX: wildcard for unimplemented methods

@@ -40,7 +40,7 @@ export const getZippedStickersAsync = (bot: TelegramBot, chatId: number) => {
     let stickersDownloaded = 0;
     const progressInterval = setInterval(async () => {
       try {
-        const percentage = (stickersDownloaded / stickers.length) * 100;
+        const percentage = Math.min((stickersDownloaded / stickers.length) * 100, 100);
         const progressStr = showProgressBar(16)(percentage) + ` ${percentage.toFixed(0)}%`;
         if (progressMsg.text === progressStr) {
           return;
@@ -50,7 +50,7 @@ export const getZippedStickersAsync = (bot: TelegramBot, chatId: number) => {
           chat_id: chatId,
         }) as TelegramBot.API.IMessage;
 
-        if (stickersDownloaded >= stickers.length) {
+        if (percentage === 100) {
           clearInterval(progressInterval);
         }
       } catch (err) {

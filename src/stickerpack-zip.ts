@@ -1,6 +1,7 @@
 import * as fetch from "isomorphic-fetch";
 import * as JSZip from "jszip";
 import * as TelegramBot from "node-telegram-bot-api";
+import showProgressBar from "./progress-bar";
 
 interface IBufferedFile {
   filename: string;
@@ -30,24 +31,54 @@ const fetchStreamAsync = async (fileURI: string): Promise<ReadableStream> => {
 /**
  * Returns a stream buffer of the zipped stickers when resolved
  * @param bot Telegram bot instance
+ * @param chatId Chat ID to send the progress bar
  */
-export const getZippedStickersAsync = (bot: TelegramBot) => {
+export const getZippedStickersAsync = (bot: TelegramBot, chatId: number) => {
   return async (stickers: TelegramBot.API.ISticker[]): Promise<Buffer> => {
-    const zip: JSZip = new JSZip();
-    const addToZipTasks = stickers.map((sticker) => {
-      // map isn't async
-      // this starts a task to put every sticker into the zip
-      // and puts the running tasks into tasks array
-      return (async () => {
-        const bufferedFile = await getBufferedStickerAsync(bot)(sticker);
-        zip.file(bufferedFile.filename, bufferedFile.stream);
-      })();
-    });
+    // Show progress
+    let progressMsg = await bot.sendMessage(chatId, showProgressBar(16)(0));
+    let stickersDownloaded = 0;
+    const progressInterval = setInterval(async () => {
+      try {
+        const percentage = (stickersDownloaded / stickers.length) * 100;
+        const progressStr = showProgressBar(16)(percentage) + ` ${percentage.toFixed(0)}%`;
+        if (progressMsg.text === progressStr) {
+          return;
+        }
+        progressMsg = await bot.editMessageText(progressStr, {
+          message_id: progressMsg.message_id,
+          chat_id: chatId,
+        }) as TelegramBot.API.IMessage;
 
-    // make sure all the stickers are added to zip
-    await Promise.all(addToZipTasks);
+        if (stickersDownloaded >= stickers.length) {
+          clearInterval(progressInterval);
+        }
+      } catch (err) {
+        clearInterval(progressInterval);
+      }
+    }, 500);
 
-    // generate the zip
-    return zip.generateAsync({ type: "nodebuffer", streamFiles: true });
+    try {
+      const zip: JSZip = new JSZip();
+      const addToZipTasks = stickers.map((sticker) => {
+        // map isn't async
+        // this starts a task to put every sticker into the zip
+        // and puts the running tasks into tasks array
+        return (async () => {
+          const bufferedFile = await getBufferedStickerAsync(bot)(sticker);
+          stickersDownloaded++;
+          zip.file(bufferedFile.filename, bufferedFile.stream);
+        })();
+      });
+
+      // make sure all the stickers are added to zip
+      await Promise.all(addToZipTasks);
+
+      // generate the zip
+      return zip.generateAsync({ type: "nodebuffer", streamFiles: true });
+    } catch (err) {
+      clearInterval(progressInterval);
+      throw err;
+    }
   };
 };

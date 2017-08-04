@@ -23,7 +23,7 @@ export default (bot: TelegramBot) => async (msg: TelegramBot.API.IMessage) => {
 
   try {
     // give user the download link to the zipped sticker pack
-    const zipBuffer = await getZippedStickersAsync(bot)(stickerSet.stickers);
+    const zipBuffer = await getZippedStickersAsync(bot, msg.chat.id)(stickerSet.stickers);
     bot.sendDocument(msg.chat.id, zipBuffer, {
       reply_to_message_id: msg.message_id,
     }, {
